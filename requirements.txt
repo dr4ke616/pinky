@@ -1,0 +1,4 @@
+pyzmq
+txZMQ
+twisted
+coverage
