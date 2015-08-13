@@ -2,3 +2,4 @@ pyzmq
 txZMQ
 twisted
 coverage
+u-msgpack-python
