@@ -12,9 +12,6 @@ from zope.interface import implementer
 
 from pinky.lib.interfaces import ISerializer
 
-ISO_DATE_FMT = '%Y-%m-%d'
-DATE_FMT = ISO_DATE_FMT
-
 
 @implementer(ISerializer)
 class MSGPackSerializer(object):
