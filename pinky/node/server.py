@@ -12,9 +12,7 @@ class NodeServer(BaseServer):
         self._is_registered = False
         self._debug = kwargs.pop('debug', False)
         self._serializer = kwargs.pop('serializer', MSGPackSerializer)
-
-        cache = kwargs.pop('cache', InMemoryCache)
-        self._cache_class = cache()
+        self._cache_class = kwargs.pop('cache', InMemoryCache)()
 
         super(NodeServer, self).__init__(factory, endpoint, *args, **kwargs)
 
@@ -42,4 +40,4 @@ class NodeServer(BaseServer):
         return self._cache_class.delete(key)
 
     def keys(self, pattern):
-        return self._cache_class.keys(key, pattern)
+        return self._cache_class.keys(pattern)

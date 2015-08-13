@@ -8,7 +8,7 @@ if 'pinky' not in sys.path:
         os.path.dirname(os.path.realpath(__file__)), '../..'))
 
 
-from pinky.node import run_server, run_client
+from pinky.node import run_server, run_client  # noqa
 
 
 if sys.argv[1] == '--server':

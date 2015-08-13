@@ -6,6 +6,7 @@ from twisted.internet import reactor
 from server import NodeServer
 from client import NodeClient
 
+
 def run_server():
     log.startLogging(sys.stdout)
 
@@ -32,5 +33,4 @@ def run_client():
     reactor.run()
 
 
-
-__all__ = ['NodeServer', 'run_node']
+__all__ = ['NodeServer', 'NodeClient']

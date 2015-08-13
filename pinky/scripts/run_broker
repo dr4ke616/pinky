@@ -1,8 +1,16 @@
 #!/usr/bin/env python
+import os
 import sys
-from broker import run_broker, run_broker_client
+
+
+if 'pinky' not in sys.path:
+    sys.path.append(os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), '../..'))
+
+
+from pinky.broker import run_server, run_client  # noqa
 
 if sys.argv[1] == '--server':
-    run_broker()
+    run_server()
 elif sys.argv[1] == '--client':
-    run_broker_client()
+    run_client()
