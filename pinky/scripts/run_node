@@ -1,0 +1,17 @@
+#!/usr/bin/env python
+import os
+import sys
+
+
+if 'pinky' not in sys.path:
+    sys.path.append(os.path.join(
+        os.path.dirname(os.path.realpath(__file__)), '../..'))
+
+
+from pinky.node import run_server, run_client
+
+
+if sys.argv[1] == '--server':
+    run_server()
+elif sys.argv[1] == '--client':
+    run_client()

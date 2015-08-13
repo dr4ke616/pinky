@@ -12,13 +12,9 @@ class BaseServer(ZmqREPConnection):
     @classmethod
     def create(cls, address, *args, **kwargs):
         log.msg('Creating {} on address {}'.format(cls.__name__, address))
-        debug = kwargs.pop('debug', False)
-
-        client = cls(
+        return cls(
             ZmqFactory(), ZmqEndpoint('bind', address), *args, **kwargs
         )
-        client._debug = debug
-        return client
 
 
 class BaseClient(ZmqREQConnection):
@@ -26,13 +22,9 @@ class BaseClient(ZmqREQConnection):
     @classmethod
     def create(cls, address, *args, **kwargs):
         log.msg('Creating {} on address {}'.format(cls.__name__, address))
-        debug = kwargs.pop('debug', False)
-
-        client = cls(
+        return cls(
             ZmqFactory(), ZmqEndpoint('connect', address), *args, **kwargs
         )
-        client._debug = debug
-        return client
 
     def sendMsg(self, message, *args, **kwargs):
         if self._debug:

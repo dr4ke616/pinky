@@ -1,7 +1,7 @@
 import re
 
 
-class Cache(dict):
+class InMemoryCache(dict):
 
     def set(self, key, value):
         self[key] = value

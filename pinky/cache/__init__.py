@@ -1,4 +1,4 @@
-from cache import Cache
+from cache import InMemoryCache
 
 
-__all__ = ['Cache']
+__all__ = ['InMemoryCache']
