@@ -1,4 +1,3 @@
-import umsgpack
 import unittest
 
 from decimal import Decimal
