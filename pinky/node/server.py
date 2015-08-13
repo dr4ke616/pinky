@@ -1,7 +1,11 @@
 import uuid
 
+from twisted.python import log
+
 from pinky.cache import InMemoryCache
 from pinky.lib.base import BaseServer
+from pinky.broker.client import BrokerClient
+from pinky.lib.exceptions import NodeRegisterFailed
 from pinky.lib.serializer.msgpack_serializer import MSGPackSerializer
 
 
@@ -10,22 +14,45 @@ class NodeServer(BaseServer):
     def __init__(self, factory, endpoint, *args, **kwargs):
         self._id = None
         self._is_registered = False
+        self._address = endpoint.address
         self._debug = kwargs.pop('debug', False)
         self._serializer = kwargs.pop('serializer', MSGPackSerializer)
         self._cache_class = kwargs.pop('cache', InMemoryCache)()
 
         super(NodeServer, self).__init__(factory, endpoint, *args, **kwargs)
 
+        broker = kwargs.pop('broker', BrokerClient)
+        if kwargs.get('auto_register', True):
+            self.register_with_broker(broker)
+
     @property
     def id(self):
         if self._id is None:
-            self._id = uuid.uuid4()
+            self._id = str(uuid.uuid4())
 
         return self._id
 
     def gotMessage(self, message_id, message):
         super(NodeServer, self).gotMessage(message_id, message)
         self.reply(message_id, 'some reply')
+
+    def register_with_broker(self, broker):
+        if self._is_registered is True:
+            return
+
+        def check_resp(resp):
+            if resp['success'] is False:
+                raise NodeRegisterFailed(resp['message'])
+
+            log.msg('Successfully registered node {}'.format(self.id))
+            self._is_registered = True
+
+        self._broker = broker.create(
+            'tcp://127.0.0.1:43435', debug=self._debug
+        )
+        d = self._broker.register_node(self.id, self._address)
+        d.addCallback(check_resp)
+        return d
 
     def set(self, key, value):
         return self._cache_class.set(key, value)

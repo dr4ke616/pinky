@@ -10,7 +10,7 @@ from client import NodeClient
 def run_server():
     log.startLogging(sys.stdout)
 
-    NodeServer.create('tcp://127.0.0.1:43435', debug=True)
+    NodeServer.create('tcp://127.0.0.1:43455', debug=True)
 
     reactor.run()
 

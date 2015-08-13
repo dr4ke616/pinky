@@ -1,7 +1,7 @@
 from twisted.python import log
 
-from pinky.node import NodeClient
 from pinky.lib.base import BaseServer
+from pinky.node.client import NodeClient
 from pinky.lib.serializer.msgpack_serializer import MSGPackSerializer
 
 
@@ -38,12 +38,22 @@ class BrokerServer(BaseServer):
         args, kwargs = message['args'], message['kwargs']
 
         if method not in self._allowed_methods:
+            if self._debug:
+                log.msg('Forbidden method call')
+
             return self.generate_fail_resp('FORBIDDEN')
 
-        return getattr(self, method)(*args, **kwargs)
+        try:
+            return getattr(self, method)(*args, **kwargs)
+        except Exception as err:
+            log.err('Failed to execute {}'.format(method))
+            log.err()  # log traceback
+            return self.generate_fail_resp(str(err))
 
     def register_node(self, node_id, address):
-
+        log.msg(
+            'Registering node {} with address of {}'.format(node_id, address)
+        )
         self._nodes.append(node_id)
 
         client = self._node_client.create(address)
