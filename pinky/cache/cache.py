@@ -7,7 +7,7 @@ class InMemoryCache(dict):
         self[key] = value
 
     def get(self, key):
-        return super(Cache, self).get(key)
+        return super(InMemoryCache, self).get(key)
 
     def mget(self, keys):
         return [self.get(k) for k in keys]
@@ -21,7 +21,7 @@ class InMemoryCache(dict):
     def keys(self, pattern):
         retval = []
         regex = re.compile(pattern.replace('*', '(.*)'))
-        for key in super(Cache, self).keys():
+        for key in super(InMemoryCache, self).keys():
             match = regex.match(key)
             if match:
                 for gr in match.groups():
