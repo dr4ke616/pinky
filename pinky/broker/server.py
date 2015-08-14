@@ -39,7 +39,7 @@ class BrokerServer(BaseServer):
 
         if method not in self._allowed_methods:
             if self._debug:
-                log.msg('Forbidden method call')
+                log.msg('Forbidden method call {}'.format(method))
 
             return self.generate_fail_resp('FORBIDDEN')
 

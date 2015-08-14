@@ -4,7 +4,6 @@ from twisted.python import log
 
 from pinky.cache import InMemoryCache
 from pinky.lib.base import BaseServer
-from pinky.broker.client import BrokerClient
 from pinky.lib.exceptions import NodeRegisterFailed
 from pinky.lib.serializer.msgpack_serializer import MSGPackSerializer
 
@@ -21,10 +20,6 @@ class NodeServer(BaseServer):
 
         super(NodeServer, self).__init__(factory, endpoint, *args, **kwargs)
 
-        broker = kwargs.pop('broker', BrokerClient)
-        if kwargs.get('auto_register', True):
-            self.register_with_broker(broker)
-
     @property
     def id(self):
         if self._id is None:
@@ -36,7 +31,7 @@ class NodeServer(BaseServer):
         super(NodeServer, self).gotMessage(message_id, message)
         self.reply(message_id, 'some reply')
 
-    def register_with_broker(self, broker):
+    def register_with_broker(self, broker, address):
         if self._is_registered is True:
             return
 
@@ -47,10 +42,8 @@ class NodeServer(BaseServer):
             log.msg('Successfully registered node {}'.format(self.id))
             self._is_registered = True
 
-        self._broker = broker.create(
-            'tcp://127.0.0.1:43435', debug=self._debug
-        )
-        d = self._broker.register_node(self.id, self._address)
+        d = broker.create(
+            address, debug=self._debug).register_node(self.id, self._address)
         d.addCallback(check_resp)
         return d
 
