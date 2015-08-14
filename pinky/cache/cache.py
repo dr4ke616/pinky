@@ -1,6 +1,9 @@
 import re
+from zope.interface import implementer
+from pinky.lib.interfaces import IStorage
 
 
+@implementer(IStorage)
 class InMemoryCache(dict):
 
     def set(self, key, value):

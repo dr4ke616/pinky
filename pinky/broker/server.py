@@ -1,10 +1,13 @@
 from twisted.python import log
+from zope.interface import implementer
 
 from pinky.lib.base import BaseServer
 from pinky.node.client import NodeClient
+from pinky.lib.interfaces import IStorage
 from pinky.lib.serializer.msgpack_serializer import MSGPackSerializer
 
 
+@implementer(IStorage)
 class BrokerServer(BaseServer):
 
     def __init__(self, factory, endpoint, *args, **kwargs):
@@ -60,3 +63,21 @@ class BrokerServer(BaseServer):
         self._connections[node_id] = client
 
         return self.generate_success_resp('Register successful')
+
+    def set(self, key, value):
+        pass
+
+    def get(self, key):
+        pass
+
+    def mget(self, keys):
+        pass
+
+    def delete(self, key):
+        pass
+
+    def keys(self, pattern):
+        pass
+
+    def _fire_command(self, command):
+        pass

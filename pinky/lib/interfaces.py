@@ -30,3 +30,26 @@ class ISerializer(Interface):
             JSON, Yaml, etc. This method is expected to return a data
             structure best suited for the class.
         """
+
+
+class IStorage(Interface):
+
+    def set(key, value):
+        """
+        """
+
+    def get(key):
+        """
+        """
+
+    def mget(keys):
+        """
+        """
+
+    def delete(key):
+        """
+        """
+
+    def keys(pattern):
+        """
+        """

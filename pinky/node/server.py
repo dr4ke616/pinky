@@ -1,13 +1,16 @@
 import uuid
 
 from twisted.python import log
+from zope.interface import implementer
 
 from pinky.cache import InMemoryCache
 from pinky.lib.base import BaseServer
+from pinky.lib.interfaces import IStorage
 from pinky.lib.exceptions import NodeRegisterFailed
 from pinky.lib.serializer.msgpack_serializer import MSGPackSerializer
 
 
+@implementer(IStorage)
 class NodeServer(BaseServer):
 
     def __init__(self, factory, endpoint, *args, **kwargs):
