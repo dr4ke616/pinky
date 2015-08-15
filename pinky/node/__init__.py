@@ -11,7 +11,7 @@ from pinky.broker.client import BrokerClient
 def run_server():
     log.startLogging(sys.stdout)
 
-    server = NodeServer.create('tcp://127.0.0.1:43455', debug=True)
+    server = NodeServer.create('tcp://127.0.0.1:43465', debug=True)
     server.register_with_broker(BrokerClient, 'tcp://127.0.0.1:43435')
 
     reactor.run()

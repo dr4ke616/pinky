@@ -25,19 +25,19 @@ def run_client():
         print("Got reply: %s" % (reply))
 
     client = BrokerClient.create('tcp://127.0.0.1:43435', debug=True)
-    client.set('some_key222', 'some_value')
+    client.set('some_key111', 'some_value')
 
-    d = client.get('some_key222')
+    d = client.get('some_key111')
     d.addCallback(doPrint)
 
-    d = client.mget(['some_key222'])
-    d.addCallback(doPrint)
+    # d = client.mget(['some_key222'])
+    # d.addCallback(doPrint)
 
-    d = client.keys('some_key*')
-    d.addCallback(doPrint)
+    # d = client.keys('some_key*')
+    # d.addCallback(doPrint)
 
-    d = client.delete('some_key222')
-    d.addCallback(doPrint)
+    # d = client.delete('some_key222')
+    # d.addCallback(doPrint)
 
     d.addCallback(lambda _: reactor.stop())
 

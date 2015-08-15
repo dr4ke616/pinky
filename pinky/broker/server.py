@@ -84,6 +84,22 @@ class BrokerServer(BaseServer):
         node_id = self._nodes[machine]
         return self._connections[node_id]
 
+    def _distribute_to_nodes(self, operation, node, *args, **kwargs):
+        wait_for_all = kwargs.pop('wait_for_all', True)
+        dlist = [getattr(node, operation)(*args, **kwargs)]
+
+        for other_node in self._connections.values():
+            if other_node == node:
+                continue
+
+            d = getattr(other_node, operation)(*args, **kwargs)
+            if wait_for_all:
+                dlist.append(d)
+
+        d = defer.gatherResults(dlist)
+        d.addCallback(lambda _: Success(None))
+        return d
+
     def get(self, key):
         node = self.get_node_by_key(key)
 
@@ -109,30 +125,14 @@ class BrokerServer(BaseServer):
 
     def set(self, key, value, wait_for_all=True):
         node = self.get_node_by_key(key)
-        dlist = [node.set(key, value)]
-
-        if wait_for_all:
-            for other_node in self._connections.values():
-                if other_node == node:
-                    continue
-
-                dlist.append(other_node.set(key, value))
-
-        d = defer.gatherResults(dlist)
-        d.addCallback(lambda _: Success(None))
+        d = self._distribute_to_nodes(
+            'set', node, key, value, wait_for_all=wait_for_all
+        )
         return d
 
     def delete(self, key, wait_for_all=True):
         node = self.get_node_by_key(key)
-        dlist = [node.delete(key)]
-
-        if wait_for_all:
-            for other_node in self._connections.values():
-                if other_node == node:
-                    continue
-
-                dlist.append(other_node.delete(key))
-
-        d = defer.gatherResults(dlist)
-        d.addCallback(lambda _: Success(None))
+        d = self._distribute_to_nodes(
+            'delete', node, key, wait_for_all=wait_for_all
+        )
         return d
