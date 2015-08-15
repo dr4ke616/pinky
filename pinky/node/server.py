@@ -13,7 +13,7 @@ from pinky.core.exceptions import NodeRegisterFailed
 @implementer(IStorage)
 class NodeServer(BaseServer):
 
-    __allowed_methods__ = ('ping', )
+    __allowed_methods__ = ('ping', 'set', 'get', 'mget', 'delete', 'keys')
 
     def __init__(self, factory, endpoint, *args, **kwargs):
         self._id = None
@@ -55,19 +55,27 @@ class NodeServer(BaseServer):
         """ When we get a ping request from the broker,
             send back a PONG to tell it we are up
         """
+        if self._debug:
+            log.msg('Storage contents >>> {} <<<'.format(self._cache_class))
+
         return Success('PONG')
 
     def set(self, key, value):
-        return self._cache_class.set(key, value)
+        resp = self._cache_class.set(key, value)
+        return Success(resp)
 
     def get(self, key):
-        return self._cache_class.get(key)
+        resp = self._cache_class.get(key)
+        return Success(resp)
 
     def mget(self, keys):
-        return self._cache_class.mget(keys)
+        resp = self._cache_class.mget(keys)
+        return Success(resp)
 
     def delete(self, key):
-        return self._cache_class.delete(key)
+        resp = self._cache_class.delete(key)
+        return Success(resp)
 
     def keys(self, pattern):
-        return self._cache_class.keys(pattern)
+        resp = self._cache_class.keys(pattern)
+        return Success(resp)

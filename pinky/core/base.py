@@ -68,6 +68,9 @@ class BaseServer(ZmqREPConnection):
             :param response: A `pinky.core.response.Response`
                 object
         """
+        if not response:
+            return self.__serializer__.dump({})
+
         return self.__serializer__.dump(response.to_dict())
 
 
@@ -107,4 +110,24 @@ class BaseClient(ZmqREQConnection):
         d = self.sendMsg(message, timeout=timeout)
         if decode:
             d.addCallback(lambda r: self.__serializer__.load(r[0]))
+        return d
+
+    def set(self, key, value):
+        d = self.send_message('set', key, value)
+        return d
+
+    def get(self, key):
+        d = self.send_message('get', key)
+        return d
+
+    def mget(self, keys):
+        d = self.send_message('mget', keys)
+        return d
+
+    def delete(self, key):
+        d = self.send_message('delete', key)
+        return d
+
+    def keys(self, pattern):
+        d = self.send_message('keys', pattern)
         return d
