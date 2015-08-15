@@ -103,6 +103,7 @@ class BrokerServer(BaseServer):
     @check_nodes
     def sync_nodes(self):
 
+        # TODO: Error validation, what happens if we cant sync?
         d = self._take_snapshots()
         d.addCallback(self._sync_nodes)
         d.addCallback(lambda _: Success(None))
@@ -114,10 +115,12 @@ class BrokerServer(BaseServer):
 
         def _on_failed_ping(err, node_id):
             if err.type == ZmqRequestTimeoutError:
-                self.unregister_node(node_id)
-                return
-
-            raise err  # re-raise the error
+                try:
+                    self.unregister_node(node_id)
+                except ZeroNodes:
+                    pass
+            else:
+                raise err  # re-raise the error
 
         for node_id, node in self._connections.items():
             d = node.ping(self._ping_timeout)
@@ -153,6 +156,7 @@ class BrokerServer(BaseServer):
                 dlist.append(d)
 
         d = defer.gatherResults(dlist)
+        # TODO: Check response, see if we need to try again
         d.addCallback(lambda _: Success(None))
         return d
 

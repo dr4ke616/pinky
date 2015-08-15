@@ -1,7 +1,7 @@
 import unittest
 
 from pinky.core.response import (
-    Response, Success, InternalServerError, Forbidden
+    Response, Success, InternalServerError, Forbidden, Fail
 )
 
 
@@ -25,4 +25,9 @@ class TestResponse(unittest.TestCase):
     def test_forbidden(self):
         r = Forbidden()
         self.assertEqual(r.message, 'FORBIDDEN')
+        self.assertFalse(r.success)
+
+    def test_fail(self):
+        r = Fail('some_failure')
+        self.assertEqual(r.message, 'some_failure')
         self.assertFalse(r.success)
