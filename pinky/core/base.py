@@ -117,22 +117,22 @@ class BaseClient(ZmqREQConnection):
             d.addCallback(lambda r: self.__serializer__.load(r[0]))
         return d
 
-    def set(self, key, value):
-        d = self.send_message('set', key, value)
+    def set(self, key, value, **kwargs):
+        d = self.send_message('set', key, value, **kwargs)
         return d
 
-    def get(self, key):
-        d = self.send_message('get', key)
+    def get(self, key, **kwargs):
+        d = self.send_message('get', key, **kwargs)
         return d
 
-    def mget(self, keys):
-        d = self.send_message('mget', keys)
+    def mget(self, keys, **kwargs):
+        d = self.send_message('mget', keys, **kwargs)
         return d
 
-    def delete(self, key):
-        d = self.send_message('delete', key)
+    def delete(self, key, **kwargs):
+        d = self.send_message('delete', key, **kwargs)
         return d
 
-    def keys(self, pattern):
-        d = self.send_message('keys', pattern)
+    def keys(self, pattern, **kwargs):
+        d = self.send_message('keys', pattern, **kwargs)
         return d
