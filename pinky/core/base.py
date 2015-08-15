@@ -9,12 +9,15 @@ from pinky.core.serializer.msgpack_serializer import MSGPackSerializer
 class BaseServer(ZmqREPConnection):
 
     __allowed_methods__ = None
+    __serializer__ = MSGPackSerializer
 
     def __init__(self, factory, endpoint, *args, **kwargs):
         self._debug = kwargs.pop('debug', False)
-        self._serializer = kwargs.pop('serializer', MSGPackSerializer)
 
-        self._allowed_methods = ('ping', )
+        serializer = kwargs.pop('serializer', None)
+        if serializer:
+            self.__serializer__ = serializer
+
         super(BaseServer, self).__init__(factory, endpoint, *args, **kwargs)
 
     @classmethod
@@ -37,7 +40,7 @@ class BaseServer(ZmqREPConnection):
         return d
 
     def _handle_message(self, message):
-        message = self._serializer.load(message)
+        message = self.__serializer__.load(message)
         if self._debug:
             log.msg('Server recieved message {}'.format(message))
 
@@ -58,13 +61,13 @@ class BaseServer(ZmqREPConnection):
             return self.generate_fail_resp('INTERNAL_SERVER_ERROR')
 
     def generate_success_resp(self, message):
-        return self._serializer.dump({
+        return self.__serializer__.dump({
             'success': True,
             'message': message
         })
 
     def generate_fail_resp(self, message):
-        return self._serializer.dump({
+        return self.__serializer__.dump({
             'success': False,
             'message': message
         })
@@ -72,9 +75,14 @@ class BaseServer(ZmqREPConnection):
 
 class BaseClient(ZmqREQConnection):
 
+    __serializer__ = MSGPackSerializer
+
     def __init__(self, factory, endpoint, *args, **kwargs):
         self._debug = kwargs.pop('debug', False)
-        self._serializer = kwargs.pop('serializer', MSGPackSerializer)
+
+        serializer = kwargs.pop('serializer', None)
+        if serializer:
+            self.__serializer__ = serializer
 
         super(BaseClient, self).__init__(factory, endpoint, *args, **kwargs)
 
@@ -89,10 +97,6 @@ class BaseClient(ZmqREQConnection):
         if self._debug:
             log.msg('Client got message {}'.format(message))
 
-    def connectionLost(self, reason):
-        print('connection on {} closed'.format(self.__class__.__name__))
-        print(reason)
-
     def send_message(self, method, *args, **kwargs):
         decode = kwargs.pop('decode_reponse', True)
         timeout = kwargs.pop('timeout', None)
@@ -101,8 +105,8 @@ class BaseClient(ZmqREQConnection):
         if self._debug:
             log.msg('Client sending message {}'.format(data))
 
-        message = self._serializer.dump(data)
+        message = self.__serializer__.dump(data)
         d = self.sendMsg(message, timeout=timeout)
         if decode:
-            d.addCallback(lambda r: self._serializer.load(r[0]))
+            d.addCallback(lambda r: self.__serializer__.load(r[0]))
         return d
