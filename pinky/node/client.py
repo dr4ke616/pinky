@@ -1,4 +1,4 @@
-from pinky.lib.base import BaseClient
+from pinky.core.base import BaseClient
 
 
 class NodeClient(BaseClient):

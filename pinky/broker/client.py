@@ -1,6 +1,6 @@
 
-from pinky.lib.base import BaseClient
-from pinky.lib.serializer.msgpack_serializer import MSGPackSerializer
+from pinky.core.base import BaseClient
+from pinky.core.serializer.msgpack_serializer import MSGPackSerializer
 
 
 class BrokerClient(BaseClient):

@@ -10,14 +10,14 @@
 import umsgpack
 from zope.interface import implementer
 
-from pinky.lib.interfaces import ISerializer
+from pinky.core.interfaces import ISerializer
 
 
 @implementer(ISerializer)
 class MSGPackSerializer(object):
     """ MSGPackSerializer is used to convert either the raw string raw form
         to a python data structure, or vise-versa.
-        :Implements: `pinky.lib.interfaces.ISerializer`
+        :Implements: `pinky.core.interfaces.ISerializer`
         To binary Usage:
             data = {'key': 'some_value'}
             json_str = MSGPackSerializer(data).dump()

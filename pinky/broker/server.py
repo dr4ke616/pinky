@@ -1,10 +1,11 @@
 from twisted.python import log
 from zope.interface import implementer
 
-from pinky.lib.base import BaseServer
 from pinky.node.client import NodeClient
-from pinky.lib.interfaces import IStorage
-from pinky.lib.serializer.msgpack_serializer import MSGPackSerializer
+
+from pinky.core.base import BaseServer
+from pinky.core.interfaces import IStorage
+from pinky.core.serializer.msgpack_serializer import MSGPackSerializer
 
 
 @implementer(IStorage)

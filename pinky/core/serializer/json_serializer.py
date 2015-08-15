@@ -12,7 +12,7 @@ from decimal import Decimal
 from zope.interface import implementer
 from datetime import date, time, datetime
 
-from pinky.lib.interfaces import ISerializer
+from pinky.core.interfaces import ISerializer
 
 ISO_DATE_FMT = '%Y-%m-%d'
 DATE_FMT = ISO_DATE_FMT
@@ -22,7 +22,7 @@ DATE_FMT = ISO_DATE_FMT
 class JSONSerializer(object):
     """ JSONSerializer is used to convert either the raw string raw form
         to a python data structure, or vise-versa.
-        :Implements: `pinky.lib.interfaces.ISerializer`
+        :Implements: `pinky.core.interfaces.ISerializer`
         To JSON string Usage:
             data = {'key': 'some_value'}
             json_str = JSONSerializer(data).dump()

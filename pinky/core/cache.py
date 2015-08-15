@@ -1,6 +1,6 @@
 import re
 from zope.interface import implementer
-from pinky.lib.interfaces import IStorage
+from pinky.core.interfaces import IStorage
 
 
 @implementer(IStorage)

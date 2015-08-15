@@ -1,5 +1,5 @@
 from twisted.trial import unittest
-from pinky.cache import InMemoryCache
+from pinky.core.cache import InMemoryCache
 
 
 class TestInMemoryCache(unittest.TestCase):

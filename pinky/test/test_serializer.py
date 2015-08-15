@@ -2,8 +2,8 @@ import unittest
 
 from decimal import Decimal
 
-from pinky.lib.serializer.json_serializer import JSONSerializer
-from pinky.lib.serializer.msgpack_serializer import MSGPackSerializer
+from pinky.core.serializer.json_serializer import JSONSerializer
+from pinky.core.serializer.msgpack_serializer import MSGPackSerializer
 
 
 class TestJSONSerializer(unittest.TestCase):

@@ -1,12 +1,12 @@
 import unittest
 from zope.interface import verify
 
-from pinky.cache import InMemoryCache
 from pinky.node.server import NodeServer
+from pinky.core.cache import InMemoryCache
 from pinky.broker.server import BrokerServer
-from pinky.lib.interfaces import ISerializer, IStorage
-from pinky.lib.serializer.json_serializer import JSONSerializer
-from pinky.lib.serializer.msgpack_serializer import MSGPackSerializer
+from pinky.core.interfaces import ISerializer, IStorage
+from pinky.core.serializer.json_serializer import JSONSerializer
+from pinky.core.serializer.msgpack_serializer import MSGPackSerializer
 
 
 class TestInterface(unittest.TestCase):
