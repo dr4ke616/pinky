@@ -57,8 +57,8 @@ class Forbidden(Response):
         a restricted method
     """
 
-    def __init__(self, message):
-        super(Success, self).__init__('FORBIDDEN', False)
+    def __init__(self):
+        super(Forbidden, self).__init__('FORBIDDEN', False)
 
 
 @implementer(IResponse)
@@ -66,5 +66,7 @@ class InternalServerError(Response):
     """ Response to be returned in the case of an internal server error
     """
 
-    def __init__(self, message):
-        super(Success, self).__init__('INTERNAL_SERVER_ERROR', False)
+    def __init__(self):
+        super(InternalServerError, self).__init__(
+            'INTERNAL_SERVER_ERROR', False
+        )
