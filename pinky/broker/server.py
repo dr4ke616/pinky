@@ -1,58 +1,31 @@
 from twisted.python import log
+from twisted.internet.task import LoopingCall
+
 from zope.interface import implementer
+from txzmq.req_rep import ZmqRequestTimeoutError
 
 from pinky.node.client import NodeClient
 
 from pinky.core.base import BaseServer
 from pinky.core.interfaces import IStorage
-from pinky.core.serializer.msgpack_serializer import MSGPackSerializer
 
 
 @implementer(IStorage)
 class BrokerServer(BaseServer):
 
+    __allowed_methods__ = ('register_node', )
+
     def __init__(self, factory, endpoint, *args, **kwargs):
         self._nodes = []
         self._connections = {}
-        self._debug = kwargs.pop('debug', False)
         self._node_client = kwargs.pop('node_client', NodeClient)
-        self._serializer = kwargs.pop('serializer', MSGPackSerializer)
 
-        self._allowed_methods = ('register_node', )
+        self._ping_timeout = kwargs.pop('ping_timeout', 1)
+        self._ping_frequencey = kwargs.pop('ping_frequencey', 5)
+
         super(BrokerServer, self).__init__(factory, endpoint, *args, **kwargs)
 
-    def gotMessage(self, message_id, message):
-        """ Message comes in the data structure as:
-            {
-                'method': 'some_method',
-                'args': ['list', 'of', 'args'],
-                'kwargs': {'key': 'value'}
-            }
-        """
-        super(BrokerServer, self).gotMessage(message_id, message)
-        resp = self._handle_message(message)
-        self.reply(message_id, resp)
-
-    def _handle_message(self, message):
-        message = self._serializer.load(message)
-        if self._debug:
-            log.msg(message)
-
-        method = message['method']
-        args, kwargs = message['args'], message['kwargs']
-
-        if method not in self._allowed_methods:
-            if self._debug:
-                log.msg('Forbidden method call {}'.format(method))
-
-            return self.generate_fail_resp('FORBIDDEN')
-
-        try:
-            return getattr(self, method)(*args, **kwargs)
-        except Exception as err:
-            log.err('Failed to execute {}'.format(method))
-            log.err()  # log traceback
-            return self.generate_fail_resp(str(err))
+        LoopingCall(self.ping_nodes).start(self._ping_frequencey)
 
     def register_node(self, node_id, address):
         log.msg(
@@ -64,6 +37,36 @@ class BrokerServer(BaseServer):
         self._connections[node_id] = client
 
         return self.generate_success_resp('Register successful')
+
+    def unregister_node(self, node_id):
+        log.msg('Unregistering node {}'.format(node_id))
+
+        node = self._connections[node_id]
+        node.shutdown()
+        del self._connections[node_id]
+
+        self._nodes.remove(node_id)
+
+    def ping_nodes(self):
+        if self._debug:
+            log.msg('Pinging nodes')
+
+        def _on_failed_ping(err, node_id):
+            if err.type == ZmqRequestTimeoutError:
+                self.unregister_node(node_id)
+                return
+
+            raise err  # re-raise the error
+
+        for node_id, node in self._connections.items():
+            d = node.ping(self._ping_timeout)
+            if self._debug:
+                d.addCallback(lambda msg, node_id: log.msg(
+                    'Recieved message from node {}. {}'
+                    ''.format(node_id, msg)), node_id
+                )
+
+            d.addErrback(_on_failed_ping, node_id)
 
     def set(self, key, value):
         pass

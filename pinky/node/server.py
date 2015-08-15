@@ -7,18 +7,17 @@ from pinky.core.base import BaseServer
 from pinky.core.interfaces import IStorage
 from pinky.core.cache import InMemoryCache
 from pinky.core.exceptions import NodeRegisterFailed
-from pinky.core.serializer.msgpack_serializer import MSGPackSerializer
 
 
 @implementer(IStorage)
 class NodeServer(BaseServer):
 
+    __allowed_methods__ = ('ping', )
+
     def __init__(self, factory, endpoint, *args, **kwargs):
         self._id = None
         self._is_registered = False
         self._address = endpoint.address
-        self._debug = kwargs.pop('debug', False)
-        self._serializer = kwargs.pop('serializer', MSGPackSerializer)
         self._cache_class = kwargs.pop('cache', InMemoryCache)()
 
         super(NodeServer, self).__init__(factory, endpoint, *args, **kwargs)
@@ -30,25 +29,32 @@ class NodeServer(BaseServer):
 
         return self._id
 
-    def gotMessage(self, message_id, message):
-        super(NodeServer, self).gotMessage(message_id, message)
-        self.reply(message_id, 'some reply')
-
     def register_with_broker(self, broker, address):
         if self._is_registered is True:
             return
 
-        def check_resp(resp):
-            if resp['success'] is False:
-                raise NodeRegisterFailed(resp['message'])
+        broker = broker.create(address, debug=self._debug)
 
-            log.msg('Successfully registered node {}'.format(self.id))
-            self._is_registered = True
-
-        d = broker.create(
-            address, debug=self._debug).register_node(self.id, self._address)
-        d.addCallback(check_resp)
+        d = broker.register_node(self.id, self._address)
+        d.addCallback(self._register)
+        d.addCallback(lambda _: broker.shutdown())
         return d
+
+    def _register(self, message):
+        if message['success'] is False:
+            raise NodeRegisterFailed(message['message'])
+
+        log.msg(
+            'I am successfully registered with ID {} on '
+            'address {}'.format(self.id, self._address)
+        )
+        self._is_registered = True
+
+    def ping(self):
+        """ When we get a ping request from the broker,
+            send back a PONG to tell it we are up
+        """
+        return self.generate_success_resp('PONG')
 
     def set(self, key, value):
         return self._cache_class.set(key, value)
