@@ -90,7 +90,7 @@ class BrokerServer(BaseServer):
                 lambda res: data.update(res['message'])
             ) for node in self._connections.values()
         ]
-        d = defer.gatherResults(dlist, consumeErrors=True)
+        d = defer.gatherResults(dlist)
         d.addCallback(lambda _: data)
         return d
 
