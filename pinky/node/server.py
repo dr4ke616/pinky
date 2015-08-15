@@ -4,6 +4,7 @@ from twisted.python import log
 from zope.interface import implementer
 
 from pinky.core.base import BaseServer
+from pinky.core.response import Success
 from pinky.core.interfaces import IStorage
 from pinky.core.cache import InMemoryCache
 from pinky.core.exceptions import NodeRegisterFailed
@@ -54,7 +55,7 @@ class NodeServer(BaseServer):
         """ When we get a ping request from the broker,
             send back a PONG to tell it we are up
         """
-        return self.generate_success_resp('PONG')
+        return Success('PONG')
 
     def set(self, key, value):
         return self._cache_class.set(key, value)

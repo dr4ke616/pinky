@@ -3,6 +3,7 @@ from twisted.internet import defer
 
 from txzmq import ZmqREPConnection, ZmqFactory, ZmqEndpoint, ZmqREQConnection
 
+from pinky.core.response import InternalServerError, Forbidden
 from pinky.core.serializer.msgpack_serializer import MSGPackSerializer
 
 
@@ -36,6 +37,7 @@ class BaseServer(ZmqREPConnection):
             }
         """
         d = defer.maybeDeferred(self._handle_message, message)
+        d.addCallback(self.generate_response)
         d.addCallback(lambda resp: self.reply(message_id, resp))
         return d
 
@@ -51,26 +53,22 @@ class BaseServer(ZmqREPConnection):
             if self._debug:
                 log.msg('Forbidden method call {}'.format(method))
 
-            return self.generate_fail_resp('FORBIDDEN')
+            return Forbidden()
 
         try:
             return getattr(self, method)(*args, **kwargs)
         except Exception:
             log.err('Failed to execute {}'.format(method))
             log.err()  # log traceback
-            return self.generate_fail_resp('INTERNAL_SERVER_ERROR')
+            return InternalServerError()
 
-    def generate_success_resp(self, message):
-        return self.__serializer__.dump({
-            'success': True,
-            'message': message
-        })
-
-    def generate_fail_resp(self, message):
-        return self.__serializer__.dump({
-            'success': False,
-            'message': message
-        })
+    def generate_response(self, response):
+        """ Serializes the response object and returns the
+            raw form.
+            :param response: A `pinky.core.response.Response`
+                object
+        """
+        return self.__serializer__.dump(response.to_dict())
 
 
 class BaseClient(ZmqREQConnection):

@@ -4,9 +4,9 @@ from twisted.internet.task import LoopingCall
 from zope.interface import implementer
 from txzmq.req_rep import ZmqRequestTimeoutError
 
-from pinky.node.client import NodeClient
-
 from pinky.core.base import BaseServer
+from pinky.core.response import Success
+from pinky.node.client import NodeClient
 from pinky.core.interfaces import IStorage
 
 
@@ -36,7 +36,7 @@ class BrokerServer(BaseServer):
         client = self._node_client.create(address)
         self._connections[node_id] = client
 
-        return self.generate_success_resp('Register successful')
+        return Success('Register successful')
 
     def unregister_node(self, node_id):
         log.msg('Unregistering node {}'.format(node_id))

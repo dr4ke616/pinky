@@ -8,7 +8,7 @@
 .. moduleauthor:: Adam Drakeford <adam.drakeford@betbright.com>
 """
 
-from zope.interface import Interface
+from zope.interface import Interface, Attribute
 
 
 class ISerializer(Interface):
@@ -30,6 +30,27 @@ class ISerializer(Interface):
             JSON, Yaml, etc. This method is expected to return a data
             structure best suited for the class.
         """
+
+
+class IResponse(Interface):
+    """
+    Mamba Web Response interface.
+    Every web response must implement this interface.
+    """
+
+    success = Attribute(
+        """
+        :param success: Success indicator
+        :type success: bool
+        """
+    )
+
+    message = Attribute(
+        """
+        :param message: Message to be sent back
+        :type success: string/dict/list
+        """
+    )
 
 
 class IStorage(Interface):
