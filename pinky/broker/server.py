@@ -52,7 +52,7 @@ class BrokerServer(BaseServer):
     def num_nodes(self):
         return len(self._nodes)
 
-    def register_node(self, node_id, address):
+    def register_node(self, node_id, address, wait_for_sync):
         log.msg(
             'Registering node {} with address of {}'.format(node_id, address)
         )
@@ -62,10 +62,16 @@ class BrokerServer(BaseServer):
         self._connections[node_id] = client
 
         if self.num_nodes > 1:
-            self.sync_nodes()
+            d = self.sync_nodes()
+            if wait_for_sync:
+                d.addCallback(lambda _: Success(None))
+                return d
+            else:
+                return Success(None)
+        else:
+            return Success(None)
 
-        return Success('Register successful')
-
+    @check_nodes
     def unregister_node(self, node_id):
         log.msg('Unregistering node {}'.format(node_id))
 
