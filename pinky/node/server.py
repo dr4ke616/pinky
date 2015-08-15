@@ -13,7 +13,9 @@ from pinky.core.exceptions import NodeRegisterFailed
 @implementer(IStorage)
 class NodeServer(BaseServer):
 
-    __allowed_methods__ = ('ping', 'set', 'get', 'mget', 'delete', 'keys')
+    __allowed_methods__ = (
+        'ping', 'set', 'get', 'mget', 'delete', 'keys', 'sync', 'take_snapshot'
+    )
 
     def __init__(self, factory, endpoint, *args, **kwargs):
         self._id = None
@@ -59,6 +61,16 @@ class NodeServer(BaseServer):
             log.msg('Storage contents >>> {} <<<'.format(self._cache_class))
 
         return Success('PONG')
+
+    def sync(self, data):
+        """ Update internal storage
+        """
+        self._cache_class.update(data)
+
+    def take_snapshot(self):
+        """ Take snapshot of the node's data
+        """
+        return Success(self._cache_class)
 
     def set(self, key, value):
         resp = self._cache_class.set(key, value)

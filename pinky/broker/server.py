@@ -1,3 +1,5 @@
+import functools
+
 from twisted.python import log
 from twisted.internet import defer
 from twisted.internet.task import LoopingCall
@@ -10,13 +12,27 @@ from pinky.core.response import Success
 from pinky.node.client import NodeClient
 from pinky.core.interfaces import IStorage
 from pinky.core.hash import ConsistentHash
+from pinky.core.exceptions import ZeroNodes
+
+
+def check_nodes(func):
+
+    @functools.wraps(func)
+    def decorator(self, *args, **kwargs):
+
+        if self.num_nodes == 0:
+            raise ZeroNodes
+
+        return func(self, *args, **kwargs)
+
+    return decorator
 
 
 @implementer(IStorage)
 class BrokerServer(BaseServer):
 
     __allowed_methods__ = (
-        'register_node', 'set', 'get', 'mget', 'delete', 'keys'
+        'register_node', 'set', 'get', 'mget', 'delete', 'keys', 'sync_nodes'
     )
 
     def __init__(self, factory, endpoint, *args, **kwargs):
@@ -32,6 +48,10 @@ class BrokerServer(BaseServer):
 
         LoopingCall(self.ping_nodes).start(self._ping_frequencey)
 
+    @property
+    def num_nodes(self):
+        return len(self._nodes)
+
     def register_node(self, node_id, address):
         log.msg(
             'Registering node {} with address of {}'.format(node_id, address)
@@ -40,6 +60,9 @@ class BrokerServer(BaseServer):
 
         client = self._node_client.create(address)
         self._connections[node_id] = client
+
+        if self.num_nodes > 1:
+            self.sync_nodes()
 
         return Success('Register successful')
 
@@ -51,6 +74,33 @@ class BrokerServer(BaseServer):
         del self._connections[node_id]
 
         self._nodes.remove(node_id)
+
+    def _take_snapshots(self):
+        """ Take snapshots of all nodes
+        """
+        data = {}
+        dlist = [
+            node.take_snapshot().addCallback(
+                lambda res: data.update(res['message'])
+            ) for node in self._connections.values()
+        ]
+        d = defer.gatherResults(dlist, consumeErrors=True)
+        d.addCallback(lambda _: data)
+        return d
+
+    def _sync_nodes(self, data):
+        dlist = [
+            node.sync(data) for node in self._connections.values()
+        ]
+        return defer.gatherResults(dlist)
+
+    @check_nodes
+    def sync_nodes(self):
+
+        d = self._take_snapshots()
+        d.addCallback(self._sync_nodes)
+        d.addCallback(lambda _: Success(None))
+        return d
 
     def ping_nodes(self):
         if self._debug:
@@ -100,6 +150,7 @@ class BrokerServer(BaseServer):
         d.addCallback(lambda _: Success(None))
         return d
 
+    @check_nodes
     def get(self, key):
         node = self.get_node_by_key(key)
 
@@ -107,6 +158,7 @@ class BrokerServer(BaseServer):
         d.addCallback(lambda resp: Success(resp['message']))
         return d
 
+    @check_nodes
     def mget(self, keys):
         # TODO: This may need to be corrected
         node = self.get_node_by_key(keys[0])
@@ -115,6 +167,7 @@ class BrokerServer(BaseServer):
         d.addCallback(lambda resp: Success(resp['message']))
         return d
 
+    @check_nodes
     def keys(self, pattern):
         # TODO: This may need to be corrected
         node = self.get_node_by_key(pattern)
@@ -123,6 +176,7 @@ class BrokerServer(BaseServer):
         d.addCallback(lambda resp: Success(resp['message']))
         return d
 
+    @check_nodes
     def set(self, key, value, wait_for_all=True):
         node = self.get_node_by_key(key)
         d = self._distribute_to_nodes(
@@ -130,6 +184,7 @@ class BrokerServer(BaseServer):
         )
         return d
 
+    @check_nodes
     def delete(self, key, wait_for_all=True):
         node = self.get_node_by_key(key)
         d = self._distribute_to_nodes(

@@ -52,6 +52,15 @@ class Success(Response):
 
 
 @implementer(IResponse)
+class Fail(Response):
+    """ Response to be returned in the case of a controled failure
+    """
+
+    def __init__(self, message):
+        super(Fail, self).__init__(message, False)
+
+
+@implementer(IResponse)
 class Forbidden(Response):
     """ Response to be returned in the case of an attempt to access
         a restricted method

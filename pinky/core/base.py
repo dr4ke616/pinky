@@ -3,7 +3,8 @@ from twisted.internet import defer
 
 from txzmq import ZmqREPConnection, ZmqFactory, ZmqEndpoint, ZmqREQConnection
 
-from pinky.core.response import InternalServerError, Forbidden
+from pinky.core.exceptions import PinkyException
+from pinky.core.response import InternalServerError, Forbidden, Fail
 from pinky.core.serializer.msgpack_serializer import MSGPackSerializer
 
 
@@ -57,9 +58,13 @@ class BaseServer(ZmqREPConnection):
 
         try:
             return getattr(self, method)(*args, **kwargs)
-        except Exception:
+        except Exception as err:
             log.err('Failed to execute {}'.format(method))
             log.err()  # log traceback
+
+            if isinstance(err, PinkyException):
+                return Fail(err.code)
+
             return InternalServerError()
 
     def generate_response(self, response):

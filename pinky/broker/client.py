@@ -11,3 +11,6 @@ class BrokerClient(BaseClient):
         return self.send_message(
             'register_node', node_id=node_id, address=address
         )
+
+    def sync_nodes(self):
+        return self.send_message('sync_nodes')
