@@ -85,20 +85,19 @@ class BrokerServer(BaseServer):
         """ Take snapshots of all nodes
         """
         data = {}
-        dlist = [
+        d = defer.gatherResults([
             node.take_snapshot().addCallback(
                 lambda res: data.update(res['message'])
             ) for node in self._connections.values()
-        ]
-        d = defer.gatherResults(dlist)
+        ])
         d.addCallback(lambda _: data)
         return d
 
     def _sync_nodes(self, data):
-        dlist = [
+        d = defer.gatherResults([
             node.sync(data) for node in self._connections.values()
-        ]
-        return defer.gatherResults(dlist)
+        ])
+        return d
 
     @check_nodes
     def sync_nodes(self):
@@ -156,7 +155,9 @@ class BrokerServer(BaseServer):
                 dlist.append(d)
 
         d = defer.gatherResults(dlist)
-        # TODO: Check response, see if we need to try again
+        # TODO: Check defer list for errors, see if we need to try again
+        # Also - we're sending to many nodes, so if we fail on one after,
+        # a certain amount of retries, do we roleback the other nodes ?
         d.addCallback(lambda _: Success(None))
         return d
 

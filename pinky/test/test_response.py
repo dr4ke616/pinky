@@ -1,4 +1,4 @@
-import unittest
+from twisted.trial import unittest
 
 from pinky.core.response import (
     Response, Success, InternalServerError, Forbidden, Fail

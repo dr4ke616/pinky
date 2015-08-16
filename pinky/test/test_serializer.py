@@ -1,6 +1,5 @@
-import unittest
-
 from decimal import Decimal
+from twisted.trial import unittest
 
 from pinky.core.serializer.json_serializer import JSONSerializer
 from pinky.core.serializer.msgpack_serializer import MSGPackSerializer

@@ -1,5 +1,5 @@
-import unittest
 from zope.interface import verify
+from twisted.trial import unittest
 
 from pinky.node.server import NodeServer
 from pinky.node.client import NodeClient
@@ -9,7 +9,7 @@ from pinky.broker.client import BrokerClient
 from pinky.core.serializer.json_serializer import JSONSerializer
 from pinky.core.interfaces import ISerializer, IStorage, IResponse
 from pinky.core.serializer.msgpack_serializer import MSGPackSerializer
-from pinky.core.response import Success, InternalServerError, Forbidden
+from pinky.core.response import Success, InternalServerError, Forbidden, Fail
 
 
 class TestInterface(unittest.TestCase):
@@ -30,6 +30,7 @@ class TestInterface(unittest.TestCase):
         self.assertTrue(verify.verifyClass(IStorage, InMemoryCache))
 
     def test_response_interfaces(self):
+        self.assertTrue(verify.verifyClass(IResponse, Fail))
         self.assertTrue(verify.verifyClass(IResponse, Success))
         self.assertTrue(verify.verifyClass(IResponse, Forbidden))
         self.assertTrue(verify.verifyClass(IResponse, InternalServerError))
