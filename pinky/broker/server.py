@@ -67,9 +67,9 @@ class BrokerServer(BaseServer):
                 d.addCallback(lambda _: Success(None))
                 return d
             else:
-                return Success(None)
+                return defer.succeed(Success(None))
         else:
-            return Success(None)
+            return defer.succeed(Success(None))
 
     @check_nodes
     def unregister_node(self, node_id):
