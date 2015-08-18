@@ -4,6 +4,7 @@ from mock import Mock, patch
 from twisted.trial import unittest
 from twisted.internet import defer
 from txzmq import ZmqEndpoint, ZmqFactory
+from txzmq.req_rep import ZmqRequestTimeoutError
 
 from pinky.core.response import Success
 from pinky.node.client import NodeClient
@@ -316,3 +317,40 @@ class TestBrokerServer(unittest.TestCase):
     def test_sync_zero_nodes(self):
         broker = BrokerServer.create(ADDRESS, node_client=MockNodeClient)
         self.assertRaises(ZeroNodes, broker.sync_nodes)
+
+    def test_ping_nodes(self):
+        MockNodeClient.ping = Mock(
+            side_affect=lambda: defer.succeed(None),
+            return_value=defer.succeed(None)
+        )
+        broker = BrokerServer.create(ADDRESS, node_client=MockNodeClient)
+        broker.register_node(
+            'some_id', 'some_address', wait_for_sync=False
+        )
+
+        broker.ping_nodes()
+        self.assertTrue(MockNodeClient.ping.called)
+
+    def test__distribute_to_nodes(self):
+        MockNodeClient.sync = Mock(
+            side_affect=lambda: defer.succeed(None),
+            return_value=defer.succeed(True)
+        )
+        MockNodeClient.set = Mock(
+            side_affect=lambda: defer.succeed(None),
+            return_value=defer.succeed(True)
+        )
+        broker = BrokerServer.create(ADDRESS, node_client=MockNodeClient)
+        broker.register_node(
+            'some_id1', 'some_address1', wait_for_sync=False
+        )
+        broker.register_node(
+            'some_id2', 'some_address2', wait_for_sync=False
+        )
+
+        main_node = broker._connections['some_id1']
+        d = broker._distribute_to_nodes('set', main_node)
+        d.addCallback(
+            lambda _: self.assertEqual(MockNodeClient.set.call_count, 2)
+        )
+        return d

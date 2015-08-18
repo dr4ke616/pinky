@@ -36,7 +36,8 @@ class Response(object):
     def __repr__(self):
         """ Rrepresent the object as a string
         """
-        return 'Response({})'.format(
+        return '{}({})'.format(
+            self.__class__.__name__,
             ', '.join(map(repr, [self.message, self.success]))
         )
 
