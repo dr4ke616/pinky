@@ -4,7 +4,6 @@ from mock import Mock, patch
 from twisted.trial import unittest
 from twisted.internet import defer
 from txzmq import ZmqEndpoint, ZmqFactory
-from txzmq.req_rep import ZmqRequestTimeoutError
 
 from pinky.core.response import Success
 from pinky.node.client import NodeClient
