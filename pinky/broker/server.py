@@ -36,7 +36,6 @@ class BrokerServer(BaseServer):
     )
 
     def __init__(self, factory, endpoint, *args, **kwargs):
-        self._nodes = []
         self._connections = {}
         self._node_client = kwargs.pop('node_client', NodeClient)
         self._hash_class = kwargs.pop('hash_class', ConsistentHash)
@@ -50,14 +49,20 @@ class BrokerServer(BaseServer):
 
     @property
     def num_nodes(self):
-        return len(self._nodes)
+        return len(self._connections)
+
+    @property
+    def nodes(self):
+        return self._connections.values()
+
+    @property
+    def node_ids(self):
+        return self._connections.keys()
 
     def register_node(self, node_id, address, wait_for_sync):
         log.msg(
             'Registering node {} with address of {}'.format(node_id, address)
         )
-        self._nodes.append(node_id)
-
         client = self._node_client.create(address)
         self._connections[node_id] = client
 
@@ -79,24 +84,19 @@ class BrokerServer(BaseServer):
         node.shutdown()
         del self._connections[node_id]
 
-        self._nodes.remove(node_id)
-
     def _take_snapshots(self):
         """ Take snapshots of all nodes
         """
         data = {}
         d = defer.gatherResults([
             node.take_snapshot().addCallback(
-                lambda res: data.update(res['message'])
-            ) for node in self._connections.values()
+                lambda res: data.update(res['message'])) for node in self.nodes
         ])
         d.addCallback(lambda _: data)
         return d
 
     def _sync_nodes(self, data):
-        d = defer.gatherResults([
-            node.sync(data) for node in self._connections.values()
-        ])
+        d = defer.gatherResults([node.sync(data) for node in self.nodes])
         return d
 
     @check_nodes
@@ -136,10 +136,10 @@ class BrokerServer(BaseServer):
             sends up.
             :return: `pinky.node.clinet.NodeClient` instance
         """
-        ch = self._hash_class(len(self._nodes))
+        ch = self._hash_class(self.num_nodes)
         machine = ch.get_machine(key)
 
-        node_id = self._nodes[machine]
+        node_id = self.node_ids[machine]
         return self._connections[node_id]
 
     def _distribute_to_nodes(self, operation, node, *args, **kwargs):
