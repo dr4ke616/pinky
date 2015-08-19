@@ -1,15 +1,13 @@
-import json
-
 from mock import Mock, patch
-from twisted.trial import unittest
 from twisted.internet import defer
-from txzmq import ZmqEndpoint, ZmqFactory
 
 from pinky.core.response import Success
 from pinky.node.client import NodeClient
 from pinky.core.hash import ConsistentHash
 from pinky.core.exceptions import ZeroNodes
 from pinky.broker.server import BrokerServer
+
+from helper import BaseTestServer, MockJSONSerializer, ZmqEndpoint, ZmqFactory
 
 ADDRESS = 'tcp://127.0.0.1:42000'
 
@@ -18,41 +16,6 @@ class MockLoopingCall(Mock):
 
     def start(self, *args, **kwargs):
         pass
-
-
-class MockJSONSerializer(object):
-    """ Mock JSON serializer. Just used to json encode and decode
-        for various test cases
-    """
-
-    @classmethod
-    def dump(cls, content):
-        if content is not None:
-            return json.dumps(content)
-
-    @classmethod
-    def load(cls, content):
-        if content is not None:
-            return json.loads(content)
-
-
-class MockBaseServer(object):
-
-    __serializer__ = MockJSONSerializer
-    _debug = False
-
-    def __init__(self, factory, endpoint, *args, **kwargs):
-        self.factory = factory
-        self.endpoints = [endpoint]
-
-    def shutdown(self):
-        pass
-
-    @classmethod
-    def create(cls, address, *args, **kwargs):
-        return cls(
-            ZmqFactory(), ZmqEndpoint('bind', address), *args, **kwargs
-        )
 
 
 class MockNodeClient(Mock):
@@ -70,23 +33,15 @@ class MockNodeClient(Mock):
         )
 
 
-class TestBrokerServer(unittest.TestCase):
+class TestBrokerServer(BaseTestServer):
+
+    server = BrokerServer
 
     def __init__(self, *args, **kwargs):
-        self.patchs = [
-            patch('pinky.broker.server.LoopingCall', MockLoopingCall),
-            patch.object(BrokerServer, '__bases__', (MockBaseServer, ))
-        ]
         super(TestBrokerServer, self).__init__(*args, **kwargs)
-
-    def setUp(self):
-        [p.start() for p in self.patchs]
-
-    def tearDown(self):
-        try:
-            [p.stop() for p in self.patchs]
-        except:
-            pass
+        self.add_patch(
+            patch('pinky.broker.server.LoopingCall', MockLoopingCall)
+        )
 
     def test_create(self):
         allowed_methods = (
@@ -353,3 +308,97 @@ class TestBrokerServer(unittest.TestCase):
             lambda _: self.assertEqual(MockNodeClient.set.call_count, 2)
         )
         return d
+
+    def _create_n_register_node_for_operations(self):
+        """ Heavily verbos method for creating a broker ready to be tested
+            against the persistent operations (as in set/get/mget/etc)
+        """
+        broker = BrokerServer.create(ADDRESS, node_client=MockNodeClient)
+        broker._distribute_to_nodes = Mock(return_value=defer.succeed(None))
+        broker.register_node(
+            'some_id', 'some_address', wait_for_sync=False
+        )
+        return broker
+
+    def test_set(self):
+        node = MockNodeClient()
+        broker = self._create_n_register_node_for_operations()
+        broker.get_node_by_key = Mock(return_value=node)
+
+        d = broker.set('some_key', 'some_value')
+        d.addCallback(lambda _: broker.get_node_by_key.assert_called_with('some_key'))
+        d.addCallback(lambda _: broker._distribute_to_nodes.assert_called_with(
+            'set', node, 'some_key', 'some_value', wait_for_all=True
+        ))
+        return d
+
+    def test_get(self):
+        node = MockNodeClient()
+        node.get = Mock(return_value=defer.succeed(
+            {'message': None, 'success': True})
+        )
+        broker = self._create_n_register_node_for_operations()
+        broker.get_node_by_key = Mock(return_value=node)
+
+        d = broker.get('some_key')
+        d.addCallback(lambda _: broker.get_node_by_key.assert_called_with('some_key'))
+        d.addCallback(lambda _: node.get.assert_called_with('some_key'))
+        return d
+
+    def test_mget(self):
+        node = MockNodeClient()
+        node.get = Mock(return_value=defer.succeed(
+            {'message': None, 'success': True})
+        )
+        broker = self._create_n_register_node_for_operations()
+        broker.get_node_by_key = Mock(return_value=node)
+
+        d = broker.mget(['some_key1', 'some_key2'])
+        d.addCallback(lambda _: broker.get_node_by_key.assert_called_with('some_key1'))
+        d.addCallback(lambda _: node.get.assert_called_with(['some_key1', 'some_key2']))
+        return d
+
+    def test_delete(self):
+        node = MockNodeClient()
+        broker = self._create_n_register_node_for_operations()
+        broker.get_node_by_key = Mock(return_value=node)
+
+        d = broker.delete('some_key')
+        d.addCallback(lambda _: broker.get_node_by_key.assert_called_with('some_key'))
+        d.addCallback(lambda _: broker._distribute_to_nodes.assert_called_with(
+            'delete', node, 'some_key', wait_for_all=True
+        ))
+        return d
+
+    def test_keys(self):
+        node = MockNodeClient()
+        node.keys = Mock(return_value=defer.succeed(
+            {'message': None, 'success': True})
+        )
+        broker = self._create_n_register_node_for_operations()
+        broker.get_node_by_key = Mock(return_value=node)
+
+        d = broker.keys('some_key*')
+        d.addCallback(lambda _: broker.get_node_by_key.assert_called_with('some_key*'))
+        d.addCallback(lambda _: node.keys.assert_called_with('some_key*'))
+        return d
+
+    def test_set_zero_nodes(self):
+        broker = BrokerServer.create(ADDRESS, node_client=MockNodeClient)
+        self.assertRaises(ZeroNodes, broker.set, 'some_key', 'some_value')
+
+    def test_get_zero_nodes(self):
+        broker = BrokerServer.create(ADDRESS, node_client=MockNodeClient)
+        self.assertRaises(ZeroNodes, broker.set, 'some_key')
+
+    def test_mget_zero_nodes(self):
+        broker = BrokerServer.create(ADDRESS, node_client=MockNodeClient)
+        self.assertRaises(ZeroNodes, broker.set, ['some_key'])
+
+    def test_keys_zero_nodes(self):
+        broker = BrokerServer.create(ADDRESS, node_client=MockNodeClient)
+        self.assertRaises(ZeroNodes, broker.set, 'some_key*')
+
+    def test_delete_zero_nodes(self):
+        broker = BrokerServer.create(ADDRESS, node_client=MockNodeClient)
+        self.assertRaises(ZeroNodes, broker.set, 'some_key')

@@ -1,13 +1,11 @@
-import json
 from mock import patch, Mock
-from txzmq import ZmqEndpoint, ZmqFactory
 
-from twisted.trial import unittest
 from twisted.internet import defer
 
 from pinky.core.response import Success
 from pinky.node.server import NodeServer
 from pinky.core.cache import InMemoryCache
+from helper import BaseTestServer, MockJSONSerializer, ZmqEndpoint, ZmqFactory
 
 ADDRESS = 'tcp://127.0.0.1:42000'
 
@@ -32,58 +30,13 @@ class MockBroker(Mock):
         return defer.succeed({'message': None, 'success': True})
 
 
-class MockJSONSerializer(object):
-    """ Mock JSON serializer. Just used to json encode and decode
-        for various test cases
-    """
+class TestNodeServer(BaseTestServer):
 
-    @classmethod
-    def dump(cls, content):
-        if content is not None:
-            return json.dumps(content)
-
-    @classmethod
-    def load(cls, content):
-        if content is not None:
-            return json.loads(content)
-
-
-class MockBaseServer(object):
-
-    __serializer__ = MockJSONSerializer
-    _debug = False
-
-    def __init__(self, factory, endpoint, *args, **kwargs):
-        self.factory = factory
-        self.endpoints = [endpoint]
-
-    def shutdown(self):
-        pass
-
-    @classmethod
-    def create(cls, address, *args, **kwargs):
-        return cls(
-            ZmqFactory(), ZmqEndpoint('bind', address), *args, **kwargs
-        )
-
-
-class TestNodeServer(unittest.TestCase):
+    server = NodeServer
 
     def __init__(self, *args, **kwargs):
-        self.patchs = [
-            patch('pinky.node.server.uuid', MockUUID),
-            patch.object(NodeServer, '__bases__', (MockBaseServer, ))
-        ]
         super(TestNodeServer, self).__init__(*args, **kwargs)
-
-    def setUp(self):
-        [p.start() for p in self.patchs]
-
-    def tearDown(self):
-        try:
-            [p.stop() for p in self.patchs]
-        except:
-            pass
+        self.add_patch(patch('pinky.node.server.uuid', MockUUID))
 
     def test_create(self):
         allowed_methods = (
