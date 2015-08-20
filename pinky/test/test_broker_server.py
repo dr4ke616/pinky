@@ -326,7 +326,9 @@ class TestBrokerServer(BaseTestServer):
         broker.get_node_by_key = Mock(return_value=node)
 
         d = broker.set('some_key', 'some_value')
-        d.addCallback(lambda _: broker.get_node_by_key.assert_called_with('some_key'))
+        d.addCallback(
+            lambda _: broker.get_node_by_key.assert_called_with('some_key')
+        )
         d.addCallback(lambda _: broker._distribute_to_nodes.assert_called_with(
             'set', node, 'some_key', 'some_value', wait_for_all=True
         ))
@@ -341,7 +343,9 @@ class TestBrokerServer(BaseTestServer):
         broker.get_node_by_key = Mock(return_value=node)
 
         d = broker.get('some_key')
-        d.addCallback(lambda _: broker.get_node_by_key.assert_called_with('some_key'))
+        d.addCallback(
+            lambda _: broker.get_node_by_key.assert_called_with('some_key')
+        )
         d.addCallback(lambda _: node.get.assert_called_with('some_key'))
         return d
 
@@ -354,8 +358,12 @@ class TestBrokerServer(BaseTestServer):
         broker.get_node_by_key = Mock(return_value=node)
 
         d = broker.mget(['some_key1', 'some_key2'])
-        d.addCallback(lambda _: broker.get_node_by_key.assert_called_with('some_key1'))
-        d.addCallback(lambda _: node.get.assert_called_with(['some_key1', 'some_key2']))
+        d.addCallback(
+            lambda _: broker.get_node_by_key.assert_called_with('some_key1')
+        )
+        d.addCallback(
+            lambda _: node.get.assert_called_with(['some_key1', 'some_key2'])
+        )
         return d
 
     def test_delete(self):
@@ -364,7 +372,9 @@ class TestBrokerServer(BaseTestServer):
         broker.get_node_by_key = Mock(return_value=node)
 
         d = broker.delete('some_key')
-        d.addCallback(lambda _: broker.get_node_by_key.assert_called_with('some_key'))
+        d.addCallback(
+            lambda _: broker.get_node_by_key.assert_called_with('some_key')
+        )
         d.addCallback(lambda _: broker._distribute_to_nodes.assert_called_with(
             'delete', node, 'some_key', wait_for_all=True
         ))
@@ -379,7 +389,9 @@ class TestBrokerServer(BaseTestServer):
         broker.get_node_by_key = Mock(return_value=node)
 
         d = broker.keys('some_key*')
-        d.addCallback(lambda _: broker.get_node_by_key.assert_called_with('some_key*'))
+        d.addCallback(
+            lambda _: broker.get_node_by_key.assert_called_with('some_key*')
+        )
         d.addCallback(lambda _: node.keys.assert_called_with('some_key*'))
         return d
 
