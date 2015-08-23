@@ -10,7 +10,6 @@ from pinky.broker.service import BrokerService
 class Options(usage.Options):
     optParameters = [
         ['port', 'p', 43435, 'The port number to listen on.'],
-        ['host', 'h', '0.0.0.0', 'The host to run on.']
     ]
 
     optFlags = [
@@ -29,7 +28,6 @@ class BrokerServiceMaker(object):
         """
         return BrokerService(
             port=options['port'],
-            host=options['host'],
             debug=options['debug']
         )
 

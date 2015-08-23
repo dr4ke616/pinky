@@ -18,18 +18,17 @@ class BrokerService(service.Service):
         This service handles the broker server
     """
 
-    def __init__(self, port, host='0.0.0.0', server=BrokerServer, **kwargs):
+    def __init__(self, port, server=BrokerServer, **kwargs):
         self.name = 'BrokerService'
         self._debug = kwargs.get('debug', False)
 
-        self.host = host
         self.port = port
         self.server_class = server
 
         self.server = None
 
     def start(self):
-        uri = 'tcp://{host}:{port}'.format(host=self.host, port=self.port)
+        uri = 'tcp://0.0.0.0:{port}'.format(port=self.port)
         self.server = self.server_class.create(uri, debug=self._debug)
 
     def stop(self):

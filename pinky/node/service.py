@@ -32,8 +32,8 @@ class NodeService(service.Service):
         self.server = None
 
     def start(self):
-        uri = 'tcp://127.0.0.1:{port}'.format(port=self.port)
-        self.server = NodeServer.create(uri, debug=self._debug)
+        uri = 'tcp://0.0.0.0:{port}'.format(port=self.port)
+        self.server = self.server_class.create(uri, debug=self._debug)
 
         uri = 'tcp://{host}:{port}'.format(
             host=self.broker_host, port=self.broker_port
