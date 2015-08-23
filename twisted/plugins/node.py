@@ -11,8 +11,11 @@ class Options(usage.Options):
     optParameters = [
         ['port', 'p', None, 'The port number to listen on.'],
         ['broker_host', 'h', None, 'The broker host to connect to.'],
-        ['broker_port', 'p', 43435, 'The broker port to connect to.'],
-        ['debug', 'd', False, 'Enable/disable debug mode.']
+        ['broker_port', 'p', 43435, 'The broker port to connect to.']
+    ]
+
+    optFlags = [
+        ['debug', 'b', 'Enable/disable debug mode.']
     ]
 
 

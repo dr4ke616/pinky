@@ -10,8 +10,11 @@ from pinky.broker.service import BrokerService
 class Options(usage.Options):
     optParameters = [
         ['port', 'p', 43435, 'The port number to listen on.'],
-        ['host', 'h', '0.0.0.0', 'The host to run on.'],
-        ['debug', 'd', False, 'Enable/disable debug mode.']
+        ['host', 'h', '0.0.0.0', 'The host to run on.']
+    ]
+
+    optFlags = [
+        ['debug', 'b', 'Enable/disable debug mode.']
     ]
 
 
