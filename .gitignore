@@ -55,3 +55,6 @@ docs/_build/
 target/
 
 _trial_temp/
+
+# Twisted stuff
+*.cache
