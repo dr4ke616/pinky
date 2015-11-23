@@ -4,3 +4,5 @@ txZMQ
 twisted
 coverage
 u-msgpack-python
+pycrypto
+pyasn1

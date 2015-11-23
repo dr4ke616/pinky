@@ -17,6 +17,12 @@ class BaseStartOptions(usage.Options):
         ['nodaemon', 'n', 'don\'t daemonise the process.']
     ]
 
+    def postOptions(self):
+        """Post options processing
+        """
+        if len(sys.argv) == 3 and sys.argv[2] == '--help':
+            print(self)
+
 
 def handle_stop_command(srv):
     """ Kill the running service

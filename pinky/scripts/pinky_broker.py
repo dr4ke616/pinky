@@ -15,7 +15,12 @@ class StartOptions(BaseStartOptions):
     """ Start command options for pinky-broker tool
     """
     optParameters = [
-        ['port', 'p', 43435, 'The port number to listen on.']
+        ['port', 'p', 43435, 'The port number to listen on.'],
+        ['activate-ssh-server', None, False,
+            'Activate an SSH server on the broker for live debuging.'],
+        ['ssh-user', None, None, 'SSH username.'],
+        ['ssh-password', None, None, 'SSH pasword.'],
+        ['ssh-port', None, None, 'SSH port to listen on.']
     ]
 
 
@@ -36,13 +41,28 @@ class Options(usage.Options):
             print(self)
 
 
+def _handle_manhole(user, password, port, arguments):
+    if None in (user, password, port):
+        print(
+            'You need to secify SSH user, password and port to activate it'
+            ''.ljust(73), end=''
+        )
+        print('[{}]'.format(darkred('Fail')))
+        sys.exit(1)
+
+    arguments.append('--activate-ssh-server=true')
+    arguments.append('--ssh-user={}'.format(user))
+    arguments.append('--ssh-password={}'.format(password))
+    arguments.append('--ssh-port={}'.format(port))
+
+
 def handle_start_command(options):
     arguments = ['twistd']
 
     nodaemon = options.subOptions.opts['nodaemon']
     if nodaemon:
         arguments.append('--nodaemon')
-        arguments.append('--pidfile=pinky_broker.pid')
+        arguments.append('--pidfile=pinky_broker2.pid')
     else:
         arguments.append('--syslog')
         # arguments.append('--pidfile=/var/run/{}.pid'.format(service))
@@ -54,6 +74,15 @@ def handle_start_command(options):
     if options.subOptions.opts['debug']:
         arguments.append('--debug')
 
+    if options.subOptions.opts['activate-ssh-server']:
+        _handle_manhole(
+            options.subOptions.opts['ssh-user'],
+            options.subOptions.opts['ssh-password'],
+            options.subOptions.opts['ssh-port'],
+            arguments
+        )
+
+    print(arguments)
     print('Starting pinky-broker service'.ljust(73), end='')
     if nodaemon:
         os.execlp('twistd', *arguments)

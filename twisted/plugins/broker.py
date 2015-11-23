@@ -10,6 +10,11 @@ from pinky.broker.service import BrokerService
 class Options(usage.Options):
     optParameters = [
         ['port', 'p', 43435, 'The port number to listen on.'],
+        ['activate-ssh-server', None, False,
+            'Activate an SSH server on the broker for live debuging.'],
+        ['ssh-user', None, None, 'SSH username.'],
+        ['ssh-password', None, None, 'SSH pasword.'],
+        ['ssh-port', None, None, 'SSH port to listen on.']
     ]
 
     optFlags = [
@@ -28,7 +33,11 @@ class BrokerServiceMaker(object):
         """
         return BrokerService(
             port=options['port'],
-            debug=options['debug']
+            debug=options['debug'],
+            activate_ssh_server=options['activate-ssh-server'],
+            ssh_user=options['ssh-user'],
+            ssh_password=options['ssh-password'],
+            ssh_port=options['ssh-port']
         )
 
 

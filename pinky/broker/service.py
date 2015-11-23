@@ -10,6 +10,7 @@
 
 from twisted.application import service
 
+from pinky.core.manhole import ManholeServer
 from pinky.broker.server import BrokerServer
 
 
@@ -26,10 +27,26 @@ class BrokerService(service.Service):
         self.server_class = server
 
         self.server = None
+        self.manhole = None
+
+        self._init_manhole(
+            kwargs['ssh_user'], kwargs['ssh_password'],
+            kwargs['ssh_port'], kwargs['activate_ssh_server']
+        )
+
+    def _init_manhole(self, user, password, port, activate=False):
+        if not activate:
+            return
+
+        self.manhole = ManholeServer(user, password, port)
+        self.manhole.setName('Pinky-Broker-SSH-Manhole-Service')
 
     def start(self):
         uri = 'tcp://0.0.0.0:{port}'.format(port=self.port)
         self.server = self.server_class.create(uri, debug=self._debug)
+
+        if self.manhole:
+            self.manhole.startService()
 
     def stop(self):
         if self.server:
