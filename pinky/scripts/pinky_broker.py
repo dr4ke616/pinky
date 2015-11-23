@@ -62,7 +62,7 @@ def handle_start_command(options):
     nodaemon = options.subOptions.opts['nodaemon']
     if nodaemon:
         arguments.append('--nodaemon')
-        arguments.append('--pidfile=pinky_broker2.pid')
+        arguments.append('--pidfile=pinky_broker.pid')
     else:
         arguments.append('--syslog')
         # arguments.append('--pidfile=/var/run/{}.pid'.format(service))
@@ -82,7 +82,6 @@ def handle_start_command(options):
             arguments
         )
 
-    print(arguments)
     print('Starting pinky-broker service'.ljust(73), end='')
     if nodaemon:
         os.execlp('twistd', *arguments)
