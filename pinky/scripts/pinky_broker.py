@@ -16,6 +16,8 @@ class StartOptions(BaseStartOptions):
     """
     optParameters = [
         ['port', 'p', 43435, 'The port number to listen on.'],
+        ['pidfile', None, '/var/run/{}.pid'.format(SERVICE),
+            'File for the process Id.'],
         ['activate-ssh-server', None, False,
             'Activate an SSH server on the broker for live debuging.'],
         ['ssh-user', None, None, 'SSH username.'],
@@ -57,16 +59,15 @@ def _handle_manhole(user, password, port, arguments):
 
 
 def handle_start_command(options):
-    arguments = ['twistd']
+    arguments = [
+        'twistd', '--pidfile={}'.format(options.subOptions.opts['pidfile'])
+    ]
 
     nodaemon = options.subOptions.opts['nodaemon']
     if nodaemon:
         arguments.append('--nodaemon')
-        arguments.append('--pidfile=pinky_broker.pid')
     else:
         arguments.append('--syslog')
-        # arguments.append('--pidfile=/var/run/{}.pid'.format(service))
-        arguments.append('--pidfile=pinky_broker.pid')
         arguments.append('--prefix=pinky-broker')
 
     arguments.append(SERVICE)

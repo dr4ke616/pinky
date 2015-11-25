@@ -16,6 +16,8 @@ class StartOptions(BaseStartOptions):
     """
     optParameters = [
         ['port', 'p', None, 'The port number to listen on.'],
+        ['pidfile', None, '/var/run/{}.pid'.format(SERVICE),
+            'File for the process Id.'],
         ['broker_host', 'h', None, 'The broker host to connect to.'],
         ['broker_port', 'p', 43435, 'The broker port to connect to.']
     ]
@@ -39,7 +41,9 @@ class Options(usage.Options):
 
 
 def handle_start_command(options):
-    arguments = ['twistd']
+    arguments = [
+        'twistd', '--pidfile={}'.format(options.subOptions.opts['pidfile'])
+    ]
 
     port = options.subOptions.opts['port']
     broker_host = options.subOptions.opts['broker_host']
@@ -54,11 +58,8 @@ def handle_start_command(options):
     nodaemon = options.subOptions.opts['nodaemon']
     if nodaemon:
         arguments.append('--nodaemon')
-        arguments.append('--pidfile=pinky_node.pid')
     else:
         arguments.append('--syslog')
-        # arguments.append('--pidfile=/var/run/pinky_node.pid')
-        arguments.append('--pidfile=pinky_node.pid')
         arguments.append('--prefix=pinky-node')
 
     arguments.append(SERVICE)
