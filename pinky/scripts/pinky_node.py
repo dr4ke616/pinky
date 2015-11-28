@@ -6,7 +6,7 @@ import subprocess
 
 from twisted.python import usage
 from output import darkgreen, darkred
-from utils import handle_stop_command, BaseStartOptions
+from utils import handle_stop_command, BaseStartOptions, BaseStopOptions
 
 SERVICE = 'node'
 
@@ -15,11 +15,20 @@ class StartOptions(BaseStartOptions):
     """ Start command options for pinky-node tool
     """
     optParameters = [
-        ['port', 'p', None, 'The port number to listen on.'],
-        ['pidfile', None, '/var/run/{}.pid'.format(SERVICE),
+        ['port', None, None, 'The port number to listen on.'],
+        ['pidfile', None, '/var/run/pinky_node.pid',
             'File for the process Id.'],
         ['broker_host', 'h', None, 'The broker host to connect to.'],
         ['broker_port', 'p', 43435, 'The broker port to connect to.']
+    ]
+
+
+class StopOptions(BaseStopOptions):
+    """ Start command options for pinky-broker tool
+    """
+    optParameters = [
+        ['pidfile', None, '/var/run/pinky_node.pid',
+            'File for the process Id.'],
     ]
 
 
@@ -30,7 +39,7 @@ class Options(usage.Options):
 
     subCommands = [
         ['start', None, StartOptions, 'Start the pinky-node instance'],
-        ['stop', None, usage.Options, 'Stop the pinky-node instance']
+        ['stop', None, StopOptions, 'Stop the pinky-node instance']
     ]
 
     def postOptions(self):
@@ -109,7 +118,8 @@ def run():
         handle_start_command(options)
 
     if options.subCommand == 'stop':
-        handle_stop_command(SERVICE)
+        pidfile = options.subOptions.opts['pidfile']
+        handle_stop_command(SERVICE, pidfile)
 
 
 if __name__ == '__main__':

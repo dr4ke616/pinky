@@ -24,18 +24,28 @@ class BaseStartOptions(usage.Options):
             print(self)
 
 
-def handle_stop_command(srv):
+class BaseStopOptions(usage.Options):
+    """ Base Stop command options
+    """
+    synopsis = '[options]'
+
+    def postOptions(self):
+        """Post options processing
+        """
+        if len(sys.argv) == 3 and sys.argv[2] == '--help':
+            print(self)
+
+
+def handle_stop_command(srv, pid):
     """ Kill the running service
         :param srv: `str` containing the service to kill
             passed in as underscore_case
     """
     service = 'pinky_{}'.format(srv)
-    twisted_pid = filepath.FilePath('{}.pid'.format(service))
+    twisted_pid = filepath.FilePath(pid)
     if not twisted_pid.exists():
-        twisted_pid = filepath.FilePath('/var/run/{}.pid'.format(service))
-        if not twisted_pid.exists():
-            print('error: {}.pid file can\'t be found.'.format(service))
-            sys.exit(-1)
+        print('error: {}.pid file can\'t be found.'.format(service))
+        sys.exit(-1)
 
     pid = twisted_pid.open().read()
     print('killing {} process id {} with SIGINT signal'.format(

@@ -6,7 +6,7 @@ import subprocess
 
 from twisted.python import usage
 from output import darkgreen, darkred
-from utils import handle_stop_command, BaseStartOptions
+from utils import handle_stop_command, BaseStartOptions, BaseStopOptions
 
 SERVICE = 'broker'
 
@@ -15,14 +15,23 @@ class StartOptions(BaseStartOptions):
     """ Start command options for pinky-broker tool
     """
     optParameters = [
-        ['port', 'p', 43435, 'The port number to listen on.'],
-        ['pidfile', None, '/var/run/{}.pid'.format(SERVICE),
+        ['port', None, 43435, 'The port number to listen on.'],
+        ['pidfile', None, '/var/run/pinky_broker.pid',
             'File for the process Id.'],
         ['activate-ssh-server', None, False,
             'Activate an SSH server on the broker for live debuging.'],
         ['ssh-user', None, None, 'SSH username.'],
         ['ssh-password', None, None, 'SSH pasword.'],
         ['ssh-port', None, None, 'SSH port to listen on.']
+    ]
+
+
+class StopOptions(BaseStopOptions):
+    """ Start command options for pinky-broker tool
+    """
+    optParameters = [
+        ['pidfile', None, '/var/run/pinky_broker.pid',
+            'File for the process Id.'],
     ]
 
 
@@ -33,7 +42,7 @@ class Options(usage.Options):
 
     subCommands = [
         ['start', None, StartOptions, 'Start the pinky-broker instance'],
-        ['stop', None, usage.Options, 'Stop the pinky-broker instance']
+        ['stop', None, StopOptions, 'Stop the pinky-broker instance']
     ]
 
     def postOptions(self):
@@ -123,7 +132,8 @@ def run():
         handle_start_command(options)
 
     if options.subCommand == 'stop':
-        handle_stop_command(SERVICE)
+        pidfile = options.subOptions.opts['pidfile']
+        handle_stop_command(SERVICE, pidfile)
 
 
 if __name__ == '__main__':
