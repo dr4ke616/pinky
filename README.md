@@ -2,6 +2,8 @@
 
 Pinky is a multi node distributed replicated in memory cache application. The name Pinky comes from [Pink & The Brain](https://www.google.com/search?q=Pinky+%26+The+Brain), Pinky being the dopey character.
 
+[![Build Status](https://travis-ci.org/dr4ke616/pinky.svg?branch=master)](https://travis-ci.org/dr4ke616/pinky)
+
 ## How not to create distributed in memory cache
 
 `Pinky` is a single broker, multi node distributed replicated in memory cache application. This is a very simple and basic implementation that was intended for experimental purposes only. This is not intended to be used in production. `Pinky` is designed using a central broker architecture, with one or more nodes registered to the broker. `Pinky` is fully asynchronous - written in Python using the [Twisted](http://twistedmatrix.com/) framework with [ZeroMQ](http://zeromq.org/). This project was intended to gain a better understanding of `ZeroMQ` with `Twisted`.
