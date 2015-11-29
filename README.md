@@ -1,12 +1,12 @@
 # Pinky
 
-Pinky is a multi node distributed replicated in memory cache server. The name Pinky comes from [Pink & The Brain](http://google.com/search=Pinky+And+The+Brain), Pinky being the dopey character.
+Pinky is a multi node distributed replicated in memory cache application. The name Pinky comes from [Pink & The Brain](https://www.google.com/search?q=Pinky+%26+The+Brain), Pinky being the dopey character.
 
 ## How not to create distributed in memory cache
 
-`Pinky` is a single broker, multi node distributed replicated in memory cache server. This is a very simple and basic implementation that was intended for experimental purposes only. This is not intended to be used in production. `Pinky` is designed using a central broker architecture, with one or more nodes registered to the broker. `Pinky` is fully asynchronous - written in Python using the [Twisted](http://twistedmatrix.com/) framework with [ZeroMQ](http://zeromq.org/). This project was only intended to gain a better understanding of `ZeroMQ`, and the features it contains, and should probably never be used as a production solution.
+`Pinky` is a single broker, multi node distributed replicated in memory cache application. This is a very simple and basic implementation that was intended for experimental purposes only. This is not intended to be used in production. `Pinky` is designed using a central broker architecture, with one or more nodes registered to the broker. `Pinky` is fully asynchronous - written in Python using the [Twisted](http://twistedmatrix.com/) framework with [ZeroMQ](http://zeromq.org/). This project was intended to gain a better understanding of `ZeroMQ` with `Twisted`.
 
-I've realised that this architecture is fundamentally flawed. With the broker being the central point of failure, regarding all input and output communication with a given cluster as well as the main register for all of the nodes, if the broker goes down - we loose track of all the nodes. Alternative interesting architectures that are commonly used through out the `ZeroMQ` community are all outlined [here](http://zeromq.org/whitepapers:brokerless).
+I've realised that this architecture is fundamentally flawed. With the broker being the central point of failure, regarding all input and output communication with a given cluster as well as the main register for all of the nodes, if the broker goes down - we loose communication to all nodes. Alternative interesting architectures that are commonly used through out the `ZeroMQ` community are all outlined [here](http://zeromq.org/whitepapers:brokerless).
 
 ## Installation
 
@@ -58,7 +58,7 @@ To stop a node, just run `pinky-node stop`.
 ### SSH Interface
 
 When you activate the SSH service within the broker, you can login like you would any other SSH server:
-```bash
+```
 $ ssh -P 4567 foo@localhost
 foo@localhost's password:
 >>>

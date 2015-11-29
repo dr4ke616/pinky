@@ -1,3 +1,12 @@
+# Copyright (c) 2015 Adam Drakeford <adamdrakeford@gmail.com>
+# See LICENSE for more details
+
+"""
+.. module:: base
+    :platform: Unix, Windows
+    :synopsys: base module contains two base classes for client and server
+.. moduleauthor:: Adam Drakeford <adamdrakeford@gmail.com>
+"""
 from twisted.python import log
 from twisted.internet import defer
 
@@ -56,6 +65,8 @@ class BaseServer(ZmqREPConnection):
 
             return Forbidden()
 
+        # TODO: This will raise synchronously.
+        # Encapsulate into an errBack method
         try:
             return getattr(self, method)(*args, **kwargs)
         except Exception as err:

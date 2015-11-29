@@ -28,14 +28,14 @@ class MSGPackSerializer(object):
 
     @classmethod
     def dump(cls, content):
-        """
+        """ Serialize a Python object into MessagePack bytes.
         """
         if content is not None:
             return umsgpack.packb(content)
 
     @classmethod
     def load(cls, content):
-        """
+        """ Deserialize MessagePack bytes into a Python object.
         """
         if content is not None:
             return umsgpack.unpackb(content)
