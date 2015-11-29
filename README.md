@@ -14,7 +14,7 @@ I've realised that this architecture is fundamentally flawed. With the broker be
 
 Install using pip
 ```bash
-$ pip install pinky
+$ pip install txpinky
 ```
 
 If you just want to install from source

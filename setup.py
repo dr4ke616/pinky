@@ -6,15 +6,19 @@
 """
 
 import sys
+
 if not hasattr(sys, "version_info") or sys.version_info < (2, 7):
     raise RuntimeError("Pinky requires Python 2.7 or later.")
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages  # noqa
 
 setup(
-    name='Pinky',
+    name='txpinky',
     version='0.1.0',
-    description=(''),
+    description=(
+        'Pinky is a multi node distributed replicated '
+        'in memory cache application.'
+    ),
     author='Adam Drakeford',
     author_email='adamdrakeford@gmail.com',
     url='https://github.com/dr4ke616/pinky',
