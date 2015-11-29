@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import os
 import sys
+import socket
 import subprocess
 
 from twisted.python import usage
@@ -15,7 +16,9 @@ class StartOptions(BaseStartOptions):
     """ Start command options for pinky-node tool
     """
     optParameters = [
-        ['port', None, None, 'The port number to listen on.'],
+        ['port', None, None,
+            ('The port number to listen on. '
+                'By default it will pick an available port')],
         ['pidfile', None, '/var/run/pinky_node.pid',
             'File for the process Id.'],
         ['broker_host', 'h', None, 'The broker host to connect to.'],
@@ -49,17 +52,27 @@ class Options(usage.Options):
             print(self)
 
 
+def get_available_port():
+    """ Complete hack. Some operating systems may not release
+        the file descriptor straight away. So it will fail to
+        bind when creating the node server itself.
+    """
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.bind(('', 0))
+    port = s.getsockname()[1]
+    s.close()
+    return port
+
+
 def handle_start_command(options):
     arguments = [
         'twistd', '--pidfile={}'.format(options.subOptions.opts['pidfile'])
     ]
 
-    port = options.subOptions.opts['port']
+    port = options.subOptions.opts['port'] or get_available_port()
     broker_host = options.subOptions.opts['broker_host']
-    if not broker_host or not port:
-        missing = 'port' if not port else 'broker_host'
-        print('You are missing the {} paramater'.format(
-            missing).ljust(73), end='')
+    if not broker_host:
+        print('You are missing the broker_host paramater'.ljust(73), end='')
         print('[{}]'.format(darkred('Fail')))
         print(options)
         sys.exit(1)

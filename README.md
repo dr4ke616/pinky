@@ -49,7 +49,7 @@ To stop the broker, just run `pinky-broker stop`.
 Start one or more nodes.
 * `-h` `--broker_host`: The location of the central broker.
 * `-p` `--broker_port`: The port for the central broker. By default it will be `43435`
-* `--port`: Set the port for `pinky-node` to listen on. There is no default, this needs to be set.
+* `--port`: Set the port for `pinky-node` to listen on. By default it will try pick an available port.
 * `--pidfile`: Use this to set the location for the `pid` file. By default this will be `/var/run/pinky_node.pid`. This will need root access.
 
 To stop a node, just run `pinky-node stop`.

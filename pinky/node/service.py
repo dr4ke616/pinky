@@ -19,7 +19,7 @@ class NodeService(service.Service):
         This service handles the node server
     """
 
-    def __init__(self, port, server=NodeServer, **kwargs):
+    def __init__(self, port=0, server=NodeServer, **kwargs):
         self.name = 'NodeService'
         self._debug = kwargs.get('debug', False)
 

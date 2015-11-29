@@ -53,6 +53,9 @@ class BrokerService(service.Service):
             self.server.shutdown()
             self.server = None
 
+        if self.manhole:
+            self.manhole.stopService()
+
     def startService(self):
         service.Service.startService(self)
         self.start()
