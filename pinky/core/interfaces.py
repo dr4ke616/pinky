@@ -34,8 +34,8 @@ class ISerializer(Interface):
 
 class IResponse(Interface):
     """
-    Mamba Web Response interface.
-    Every web response must implement this interface.
+    Pinky Response interface. Every response from a given server
+    must implement this interface
     """
 
     success = Attribute(
@@ -56,21 +56,21 @@ class IResponse(Interface):
 class IStorage(Interface):
 
     def set(key, value):
-        """
+        """ Set the string value of a string
         """
 
     def get(key):
-        """
+        """ Get a value of a key
         """
 
     def mget(keys):
-        """
+        """ Get the values of all given keys
         """
 
     def delete(key):
-        """
+        """ Delete a key
         """
 
     def keys(pattern):
-        """
+        """ Find all keys matching a given pattern
         """

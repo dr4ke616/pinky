@@ -6,6 +6,7 @@
 .. module:: output
     :platform: Unix, Windows
     :synopsys: Output facilities, inspired on Gentoo portage
+        This code is taken straight from https://github.com/PyMamba/mamba-framework
 .. moduleauthor:: Oscar Campos <oscar.campos@member.fsf.org>
 """
 
