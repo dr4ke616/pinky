@@ -2,12 +2,14 @@ from __future__ import print_function
 
 import os
 import sys
-import socket
 import subprocess
 
 from twisted.python import usage
 from output import darkgreen, darkred
-from utils import handle_stop_command, BaseStartOptions, BaseStopOptions
+from utils import (
+    handle_stop_command, get_host_address, get_available_port,
+    BaseStartOptions, BaseStopOptions
+)
 
 SERVICE = 'node'
 
@@ -19,6 +21,9 @@ class StartOptions(BaseStartOptions):
         ['port', None, None,
             ('The port number to listen on. '
                 'By default it will pick an available port')],
+        ['host', None, None,
+            ('The host address to bind to. '
+                'By default try determine it by itself')],
         ['pidfile', None, '/var/run/pinky_node.pid',
             'File for the process Id.'],
         ['broker_host', 'h', None, 'The broker host to connect to.'],
@@ -52,24 +57,13 @@ class Options(usage.Options):
             print(self)
 
 
-def get_available_port():
-    """ Complete hack. Some operating systems may not release
-        the file descriptor straight away. So it will fail to
-        bind when creating the node server itself.
-    """
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(('', 0))
-    port = s.getsockname()[1]
-    s.close()
-    return port
-
-
 def handle_start_command(options):
     arguments = [
         'twistd', '--pidfile={}'.format(options.subOptions.opts['pidfile'])
     ]
 
     port = options.subOptions.opts['port'] or get_available_port()
+    host = options.subOptions.opts['host'] or get_host_address()['ipv4']
     broker_host = options.subOptions.opts['broker_host']
     if not broker_host:
         print('You are missing the broker_host paramater'.ljust(73), end='')
@@ -86,6 +80,7 @@ def handle_start_command(options):
 
     arguments.append(SERVICE)
     arguments.append('--port={}'.format(port))
+    arguments.append('--host={}'.format(host))
     arguments.append('--broker_host={}'.format(broker_host))
 
     if options.subOptions.opts['debug']:

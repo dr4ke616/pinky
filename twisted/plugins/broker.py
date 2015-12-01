@@ -9,7 +9,7 @@ from pinky.broker.service import BrokerService
 
 class Options(usage.Options):
     optParameters = [
-        ['port', 'p', 43435, 'The port number to listen on.'],
+        ['port', None, 43435, 'The port number to listen on.'],
         ['activate-ssh-server', None, False,
             'Activate an SSH server on the broker for live debuging.'],
         ['ssh-user', None, None, 'SSH username.'],

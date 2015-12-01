@@ -9,7 +9,8 @@ from pinky.node.service import NodeService
 
 class Options(usage.Options):
     optParameters = [
-        ['port', 'p', None, 'The port number to listen on.'],
+        ['port', None, None, 'The port number to listen on.'],
+        ['host', None, None, 'The host address to bind to.'],
         ['broker_host', 'h', None, 'The broker host to connect to.'],
         ['broker_port', 'p', 43435, 'The broker port to connect to.']
     ]
@@ -30,6 +31,7 @@ class NodeServiceMaker(object):
         """
         return NodeService(
             port=options['port'],
+            host=options['host'],
             broker_host=options['broker_host'],
             broker_port=options['broker_port'],
             debug=options['debug']

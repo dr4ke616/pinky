@@ -19,7 +19,7 @@ class NodeService(service.Service):
         This service handles the node server
     """
 
-    def __init__(self, port, server=NodeServer, **kwargs):
+    def __init__(self, port, host, server=NodeServer, **kwargs):
         self.name = 'NodeService'
         self._debug = kwargs.get('debug', False)
 
@@ -27,12 +27,13 @@ class NodeService(service.Service):
         self.broker_port = kwargs.get('broker_port', 43435)
 
         self.port = port
+        self.host = host
         self.server_class = server
 
         self.server = None
 
     def start(self):
-        uri = 'tcp://0.0.0.0:{port}'.format(port=self.port)
+        uri = 'tcp://{host}:{port}'.format(host=self.host, port=self.port)
         self.server = self.server_class.create(uri, debug=self._debug)
 
         uri = 'tcp://{host}:{port}'.format(

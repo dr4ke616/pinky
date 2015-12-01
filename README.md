@@ -80,3 +80,6 @@ Once you gain access, you will be presented with a Python REPL. Here you can imp
 - Separate `pinky-cli` that can provide a REPL and public APIs through a Python SDK.
 - Handle some errors more appropriately.
 - Look to move SSH users/password to some form of database, rather than being passed into the `pinky-broker start` command.
+
+## Known Issues
+- Needs the presence of the twisted directory for the plugins to work. Need to figure out a solution so that `twistd` command line tool sees this directory. Currently `pip` installed versions of `pinky` will not work by itself.
