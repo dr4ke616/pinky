@@ -1,0 +1,14 @@
+FROM pinky-base:0.10
+
+ENV DEFAULT_PORT=43435
+ENV ACTIVATE_SSH_SERVER=true
+ENV SSH_USER="admin"
+ENV SSH_PASS="password"
+ENV SSH_PORT=22
+
+EXPOSE $DEFAULT_PORT $SSH_PORT
+
+ENTRYPOINT cd $HOME/ && \
+           . pinky_env/bin/activate && \
+           cd pinky/ && \
+           pinky-broker start --nodaemon --debug --port=$DEFAULT_PORT --activate-ssh-server=$ACTIVATE_SSH_SERVER --ssh-user=$SSH_USER --ssh-password=$SSH_PASS --ssh-port=$SSH_PORT

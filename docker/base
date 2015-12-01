@@ -1,0 +1,30 @@
+FROM phusion/passenger-customizable:0.9.17
+
+MAINTAINER Adam Drakeford <adamdrakeford@gmail.com>
+
+# Set correct environment variables.
+ENV HOME /home
+
+# Use baseimage-docker's init process.
+CMD ["/sbin/my_init"]
+
+# Build system and git.
+RUN /pd_build/utilities.sh
+
+# Python support.
+RUN /pd_build/python.sh
+
+# Install pinky.
+RUN cd $HOME/ && \
+    apt-get -y install python-dev && \
+    curl https://bootstrap.pypa.io/ez_setup.py | python && \
+    easy_install pip && \
+    pip install virtualenv && \
+    virtualenv pinky_env && \
+    . pinky_env/bin/activate && \
+    git clone https://github.com/dr4ke616/pinky && \
+    cd pinky && \
+    python setup.py install
+
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

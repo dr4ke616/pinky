@@ -67,13 +67,38 @@ foo@localhost's password:
 ```
 
 Once you gain access, you will be presented with a Python REPL. Here you can import any module and run any action on the running instance. This is a pretty basic SSH service, there is currently no support for multiple users or SSH keys. However it is a great way to explore the data currently stored within the cluster. This can be done as follows:
-
 ```python
+>>> from pinky.core.utils import get_host_address
 >>> from pinky.broker.client import BrokerClient
->>> client = BrokerClient.create('tcp://127.0.0.1:43435')
->>> client.keys('*')
->>> client.set('some_key', 'some_value')
->>> client.get('some_key')
+>>> cl = BrokerClient.create('tcp://{}:43435'.format(get_host_address()['ipv4']))
+>>> cl.keys('*')
+>>> cl.set('some_key', 'some_value')
+>>> cl.get('some_key')
+```
+
+Note: because we are connected straight to the broker application, we can utilise a function `get_host_address` to get the host IP address the broker is running on. This returns a dictionary containing an `ipv4` and `ipv6` address. In this case we only care about the `ipv4` address.
+
+### Docker
+
+`Pinky` comes with [Docker](https://www.docker.com/) files. It is presumed that you have the latest version of Docker installed.
+
+To build the Docker images you first need to build a base Docker image, then the Broker and the Node:
+```bash
+$ docker build --rm --tag=pinky-base:0.10 --file="docker/base" .
+$ docker build --rm --tag=pinky-broker:0.10 --file="docker/broker" .
+$ docker build --rm --tag=pinky-node:0.10 --file="docker/node" .
+```
+
+Once the Docker images are successfully built, you can run them.
+
+The broker, by default this will also start a SSH server directly to the broker application. This allows you to ssh directly to it via `ssh admin@<docker_broker_host_ip>`
+```bash
+$ docker run pinky-broker:0.10
+```
+
+Then one or more nodes. You need to determine the IP address for the broker's Docker container to set `BROKER_HOST` environment variable.
+```bash
+$ docker run -e "BROKER_HOST=<docker_broker_host_ip>" pinky-node:0.10
 ```
 
 ## TODO

@@ -1,0 +1,12 @@
+FROM pinky-base:0.10
+
+ENV DEFAULT_PORT=43455
+ENV BROKER_HOST="127.0.0.1"
+ENV BROKER_PORT=43435
+
+EXPOSE $DEFAULT_PORT
+
+ENTRYPOINT cd $HOME/ && \
+           . pinky_env/bin/activate && \
+           cd pinky/ && \
+           pinky-node start --nodaemon --debug --port=$DEFAULT_PORT --broker_host=$BROKER_HOST --broker_port=$BROKER_PORT
