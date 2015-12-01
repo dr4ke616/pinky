@@ -5,11 +5,11 @@ import sys
 import subprocess
 
 from twisted.python import usage
+
+from pinky.core.utils import get_host_address, get_available_port
+
 from output import darkgreen, darkred
-from utils import (
-    handle_stop_command, get_host_address, get_available_port,
-    BaseStartOptions, BaseStopOptions
-)
+from utils import handle_stop_command, BaseStartOptions, BaseStopOptions
 
 SERVICE = 'node'
 
