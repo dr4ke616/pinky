@@ -2,7 +2,7 @@ mock==1.3.0
 txZMQ==0.7.4
 pyasn1==0.1.9
 pyzmq==15.0.0
-twisted==15.4.0
+twisted==19.7.0
 coverage==4.0.2
 pycrypto==2.6.1
 u-msgpack-python==2.1
